@@ -2,6 +2,10 @@ package com.example.mapazimuth;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -21,6 +25,10 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
     private ActionBar actionBar;
     // Tab titles
     private String[] tabs = { "Tab1", "Tab2", "Map" };
+
+    LocationManager locationManager;
+    LocationListener locationListenerGps = new MyLocationListener(true);
+    LocationListener locationListenerNetwork = new MyLocationListener(false);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +71,43 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
             public void onPageScrollStateChanged(int arg0) {
             }
         });
+
+        // Acquire a reference to the system Location Manager
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        listenLocation(true);
+    }
+
+    private void listenLocation(boolean on) {
+        boolean gpsIsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean networkIsEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+        if(gpsIsEnabled)
+        {
+            if( on ) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000L, 10F, locationListenerGps);
+            }else{
+                locationManager.removeUpdates(locationListenerGps);
+            }
+        }
+        if(networkIsEnabled)
+        {
+            if( on ) {
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000L, 10F, locationListenerNetwork);
+            }else{
+                locationManager.removeUpdates(locationListenerNetwork);
+            }
+        }
+
+        // Register the listener with the Location Manager to receive location updates
+//        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        //locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 0, 0, locationListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        listenLocation(false);
     }
 
     @Override
@@ -72,6 +117,7 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
         if( mAdapter!=null ) {
             mAdapter.setupMap();
         }
+        listenLocation(true);
     }
 
 
@@ -93,5 +139,24 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
     @Override
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
 
+    }
+
+    private class MyLocationListener implements LocationListener {
+        boolean gps;
+
+        public MyLocationListener(boolean gps) {
+            this.gps = gps;
+        }
+
+        public void onLocationChanged(Location location) {
+            // Called when a new location is found by the network location provider.
+            mAdapter.makeUseOfNewLocation(gps, location);
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+        public void onProviderEnabled(String provider) {}
+
+        public void onProviderDisabled(String provider) {}
     }
 }
