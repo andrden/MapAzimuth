@@ -3,6 +3,7 @@ package com.example.mapazimuth;
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -10,6 +11,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.Window;
+import android.view.WindowManager;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -30,10 +32,20 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
     LocationListener locationListenerGps = new MyLocationListener(true);
     LocationListener locationListenerNetwork = new MyLocationListener(false);
 
+    SensorManager sm;
+    CompassCalc compassCalc = new CompassCalc(){
+        @Override
+        void azimuthChanged() {
+            mAdapter.makeUserOfNewAzimuth(compassCalc.azimuth, compassCalc.roll);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         setContentView(R.layout.activity_maps);
        // setUpMapIfNeeded();
 // Initilization
@@ -44,6 +56,9 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
         viewPager.setAdapter(mAdapter);
         actionBar.setHomeButtonEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        sm = (SensorManager) getSystemService(SENSOR_SERVICE);
+        compassCalc.listenOn(sm);
 
         // Adding Tabs
         for (String tab_name : tabs) {
@@ -108,6 +123,7 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
     protected void onPause() {
         super.onPause();
         listenLocation(false);
+        compassCalc.listenOff(sm);
     }
 
     @Override
@@ -118,6 +134,7 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
             mAdapter.setupMap();
         }
         listenLocation(true);
+        compassCalc.listenOn(sm);
     }
 
 

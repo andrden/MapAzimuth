@@ -11,7 +11,7 @@ import android.widget.TextView;
 public class FirstPage extends Fragment {
 
     String locationStr = "loc??";
-    TextView txtLocation;
+    TextView txtLocation, txtAzimuth;
     TextView txtArea;
     String locationsAll = "locationsAll\n";
 
@@ -20,6 +20,7 @@ public class FirstPage extends Fragment {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_first, container, false);
+        txtAzimuth = (TextView)rootView.findViewById(R.id.txtAzimuth);
         txtLocation = (TextView)rootView.findViewById(R.id.txtLocation);
         txtLocation.setText(locationStr);
         txtArea = (TextView)rootView.findViewById(R.id.txtArea);
@@ -37,6 +38,11 @@ public class FirstPage extends Fragment {
             txtArea.setText(locationsAll);
         }
     }
+
+    void makeUserOfNewAzimuth(double azimuth){
+        txtAzimuth.setText("Azimuth = "+(int)azimuth);
+    }
+
 
     private void locationStr(boolean gps, Location location) {
         StringBuilder s = new StringBuilder();
