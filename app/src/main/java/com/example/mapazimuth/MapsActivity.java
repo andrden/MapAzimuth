@@ -1,6 +1,7 @@
 package com.example.mapazimuth;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.hardware.SensorManager;
@@ -10,6 +11,7 @@ import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -51,7 +53,7 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
 // Initilization
         viewPager = (ViewPager) findViewById(R.id.pager);
         actionBar = getActionBar();
-        mAdapter = new TabsPagerAdapter(getSupportFragmentManager());
+        mAdapter = new TabsPagerAdapter(getSupportFragmentManager(), this);
 
         viewPager.setAdapter(mAdapter);
         actionBar.setHomeButtonEnabled(false);
@@ -135,6 +137,17 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
         }
         listenLocation(true);
         compassCalc.listenOn(sm);
+
+        Log.w("VideoActivity", "onResume");
+        try {
+
+            mAdapter.setUpAndConfigureCamera();
+        }catch (Throwable t){
+            AlertDialog show = new AlertDialog.Builder(this)
+                    .setTitle("Err1").setMessage(""+t).setPositiveButton("OK",null).create();
+            show.show();
+        }
+
     }
 
 

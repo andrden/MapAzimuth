@@ -1,5 +1,6 @@
 package com.example.mapazimuth;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.location.Location;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -10,7 +11,6 @@ import android.support.v4.app.FragmentManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -20,8 +20,11 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class TabsPagerAdapter extends FragmentPagerAdapter {
+    Context context;
+
     SupportMapFragment mapFragment;
     FirstPage firstPage = new FirstPage();
+    CameraFragment cameraFragment;
 
     Location location;
     Marker oldMarker;
@@ -29,8 +32,10 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
 
     double azimuth;
 
-    public TabsPagerAdapter(FragmentManager fm) {
+
+    public TabsPagerAdapter(FragmentManager fm, Context context) {
         super(fm);
+        this.context = context;
     }
 
     void makeUseOfNewLocation(boolean gps, Location location){
@@ -43,6 +48,12 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
         firstPage.makeUserOfNewAzimuth(azimuth);
     }
 
+    void setUpAndConfigureCamera(){
+        if( cameraFragment!=null ){
+            cameraFragment.setUpAndConfigureCamera();
+        }
+    }
+
         @Override
     public Fragment getItem(int index) {
 
@@ -52,11 +63,13 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
                 return firstPage;
             case 1:
                 // Games fragment activity
-                return new GamesFragment();
+                cameraFragment = new CameraFragment();
+                cameraFragment.setContext(context);
+                return cameraFragment;
             case 2:
                 // Movies fragment activity
                 //return new MoviesFragment();
-                //return new GamesFragment();
+                //return new CameraFragment();
                 if( mapFragment==null ){
                     //mapFragment= new MapFragment();
                     mapFragment = new SupportMapFragment();
