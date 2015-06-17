@@ -3,6 +3,9 @@ package com.example.mapazimuth;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -28,6 +32,36 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
         this.context = context;
     }
 
+
+    class ModifiedPreview extends View{
+        Paint paint = new Paint(){{
+            setStyle(Style.STROKE);
+            setColor(Color.GREEN);
+        }};
+        Paint paintTxt = new Paint(){{
+            setStyle(Style.STROKE);
+            setColor(Color.BLUE);
+            setTextSize(20);
+        }};
+
+        public ModifiedPreview(Context context) {
+            super(context);
+
+            // This call is necessary, or else the
+            // draw method will not be called.
+            setWillNotDraw(false);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            canvas.drawCircle(20, 20, 20, paint);
+            canvas.drawLine(20, 0, canvas.getWidth(), canvas.getHeight(), paint);
+            canvas.drawText("AABBCC", canvas.getWidth()/2, canvas.getHeight()/2, paintTxt);
+        }
+
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -40,11 +74,26 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
 
         FrameLayout preview = (FrameLayout) rootView.findViewById(R.id.camera_preview);
 
-        preview.addView(mPreview);
+        preview.addView(new ModifiedPreview(context));
+        preview.addView(mPreview, 0);
 
         setUpAndConfigureCamera();
 
         return rootView;
+    }
+
+    public void onPause(){
+        super.onPause();
+
+        // stop the camera preview and all processing
+        if (mCamera != null){
+            mPreview.setCamera(null);
+            mCamera.setPreviewCallback(null);
+            mCamera.stopPreview();
+            mCamera.release();
+            mCamera = null;
+        }
+
     }
 
     /**
