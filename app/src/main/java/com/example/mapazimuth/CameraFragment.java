@@ -109,16 +109,19 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
         // Smaller images are recommended because some computer vision operations are very expensive
         List<Camera.Size> sizes = cameraParms.getSupportedPreviewSizes();
         //Camera.Size s = sizes.get(closest(sizes,320,240));
-        Camera.Size s = sizes.get(closest(sizes,160,120));
+        Camera.Size s = sizes.get(closest(sizes,800,480));
         cameraParms.setPreviewSize(s.width, s.height);
-        cameraParms.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
+
+        cameraParms.setZoom(cameraParms.getMaxZoom());
 
         // Sony:
         // cameraParms.get("iso-values") auto,off,ISO_HJR,ISO100,ISO200,ISO400,ISO800,ISO1600
-        cameraParms.set("iso", "ISO1600");
+        //cameraParms.set("iso", "ISO1600");
+        // param "sony-iso"="auto"
 
-        cameraParms.setPreviewFrameRate(20);
-        //cameraParms.setPreviewFpsRange(15, 30);
+        // "vertical-view-angle"=42.5
+        // "horizontal-view-angle"=54.8
+
         mCamera.setParameters(cameraParms);
 
         Log.w("VideoActivity", "chosen preview size " + s.width + " x " + s.height);
