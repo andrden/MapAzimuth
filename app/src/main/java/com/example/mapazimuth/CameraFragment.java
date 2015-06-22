@@ -27,10 +27,19 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
     boolean flipHorizontal;
 
     private CameraPreview mPreview;
+    ModifiedPreview modifiedPreview;
+
+    String desc = "desc....";
 
     void setContext(Context context){
         this.context = context;
     }
+
+    void makeUserOfNewAzimuth(double azimuth, String desc){
+        this.desc = "Az="+(int)azimuth+ "  "+desc;
+        modifiedPreview.postInvalidate();
+    }
+
 
 
     class ModifiedPreview extends View{
@@ -57,7 +66,7 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
             super.onDraw(canvas);
             canvas.drawCircle(20, 20, 20, paint);
             canvas.drawLine(20, 0, canvas.getWidth(), canvas.getHeight(), paint);
-            canvas.drawText("AABBCC", canvas.getWidth()/2, canvas.getHeight()/2, paintTxt);
+            canvas.drawText(desc, canvas.getWidth()/2, canvas.getHeight()/2, paintTxt);
         }
 
     }
@@ -74,7 +83,8 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
 
         FrameLayout preview = (FrameLayout) rootView.findViewById(R.id.camera_preview);
 
-        preview.addView(new ModifiedPreview(context));
+        modifiedPreview = new ModifiedPreview(context);
+        preview.addView(modifiedPreview);
         preview.addView(mPreview, 0);
 
         setUpAndConfigureCamera();

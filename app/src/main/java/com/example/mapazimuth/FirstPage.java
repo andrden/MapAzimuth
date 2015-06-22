@@ -39,8 +39,8 @@ public class FirstPage extends Fragment {
         }
     }
 
-    void makeUserOfNewAzimuth(double azimuth){
-        txtAzimuth.setText("Azimuth = "+(int)azimuth);
+    void makeUserOfNewAzimuth(double azimuth, String desc){
+        txtAzimuth.setText("Azimuth = "+(int)azimuth+ "  "+desc);
     }
 
 

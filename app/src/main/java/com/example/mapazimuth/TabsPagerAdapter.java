@@ -43,9 +43,10 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
         this.location = location;
     }
 
-    void makeUserOfNewAzimuth(double azimuth, double roll){
+    void makeUserOfNewAzimuth(double azimuth, String desc){
         this.azimuth = azimuth;
-        firstPage.makeUserOfNewAzimuth(azimuth);
+        firstPage.makeUserOfNewAzimuth(azimuth, desc);
+        cameraFragment.makeUserOfNewAzimuth(azimuth, desc);
     }
 
     void setUpAndConfigureCamera(){
@@ -88,7 +89,7 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
                 //map.getCameraPosition() -- ??
                 if( location!=null ) {
                     LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    double screenPerpAzimuth = azimuth + 90; // degrees
+                    double screenPerpAzimuth = azimuth; // degrees
                     final double KM = 30;
                     double kmX = KM * Math.sin(Math.toRadians(screenPerpAzimuth)); // delta longitudinal
                     double kmY = KM * Math.cos(Math.toRadians(screenPerpAzimuth)); // delta latitude
@@ -98,6 +99,9 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
                     LatLng latLngBearing = new LatLng(
                             location.getLatitude() + kmY / degreeLatitude,
                             location.getLongitude() + kmX / degreeLongitude);
+                    LatLng latLngBearingShort = new LatLng(
+                            location.getLatitude() + kmY / degreeLatitude / 10,
+                            location.getLongitude() + kmX / degreeLongitude / 10);
 
                     if( oldMarker!=null ){
                         oldMarker.remove();
@@ -109,7 +113,7 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
                     oldPolyline = map.addPolyline(new PolylineOptions().color(Color.BLUE).add(latLng, latLngBearing));
 
                     try {
-                        map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds(latLng, latLngBearing), 20));
+                        map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds(latLng, latLngBearingShort), 20));
                     }catch (IllegalStateException e){
                         map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, map.getMaxZoomLevel()-4));
                     }

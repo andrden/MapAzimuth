@@ -38,7 +38,19 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
     CompassCalc compassCalc = new CompassCalc(){
         @Override
         void azimuthChanged() {
-            mAdapter.makeUserOfNewAzimuth(compassCalc.azimuth, compassCalc.roll);
+            int intRoll = (int) roll.getAvg();
+            int intPitch = (int) pitch.getAvg();
+
+            // directly compute:
+            double magAzimuth = 180  - Math.toDegrees(Math.atan2(geomagAvg[1].getAvg()/*gy*/, geomagAvg[2].getAvg()/*gz*/));
+
+
+            String desc = "roll=" + intRoll + " pitch=" + intPitch;
+            if( intRoll < -80 && Math.abs(intPitch) < 5 ) {
+               desc += String.format(" gx=%.1f gy=%.1f gz=%.1f  a=%.1f",
+                        geomagAvg[0].getAvg(), geomagAvg[1].getAvg(), geomagAvg[2].getAvg(), magAzimuth);
+            }
+            mAdapter.makeUserOfNewAzimuth(magAzimuth /*compassCalc.azimuth.getAvg()+90*/, desc);
         }
     };
 

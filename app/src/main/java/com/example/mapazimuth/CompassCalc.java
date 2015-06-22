@@ -12,12 +12,13 @@ public abstract class CompassCalc implements SensorEventListener {
     float[] inR = new float[16];
     float[] I = new float[16];
     float[] gravity = new float[3];
-    float[] geomag = new float[3];
     float[] orientVals = new float[3];
 
-    double azimuth = 0;
-    double pitch = 0;
-    double roll = 0;
+    SecondAvg azimuth = new SecondAvg();
+    SecondAvg pitch = new SecondAvg();
+    SecondAvg roll = new SecondAvg();
+
+    SecondAvg[] geomagAvg = {new SecondAvg(), new SecondAvg(), new SecondAvg()};
 
     abstract void azimuthChanged();
 
@@ -39,6 +40,8 @@ public abstract class CompassCalc implements SensorEventListener {
         if (sensorEvent.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE)
             return;
 
+        float[] geomag = new float[3];
+
         // Gets the value of the sensor that has been changed
         switch (sensorEvent.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
@@ -46,6 +49,9 @@ public abstract class CompassCalc implements SensorEventListener {
                 break;
             case Sensor.TYPE_MAGNETIC_FIELD:
                 geomag = sensorEvent.values.clone();
+                geomagAvg[0].add(geomag[0]);
+                geomagAvg[1].add(geomag[1]);
+                geomagAvg[2].add(geomag[2]);
                 break;
         }
 
@@ -57,10 +63,12 @@ public abstract class CompassCalc implements SensorEventListener {
                     gravity, geomag);
             if (success) {
                 SensorManager.getOrientation(inR, orientVals);
-                azimuth = Math.toDegrees(orientVals[0]);
-                pitch = Math.toDegrees(orientVals[1]);
-                roll = Math.toDegrees(orientVals[2]);
-                azimuthChanged();
+                boolean avgChanged = azimuth.add( Math.toDegrees(orientVals[0]) );
+                pitch.add( Math.toDegrees(orientVals[1]) );
+                roll.add(Math.toDegrees(orientVals[2]));
+                if( avgChanged ) {
+                    azimuthChanged();
+                }
             }
         }
     }
