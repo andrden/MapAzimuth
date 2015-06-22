@@ -30,13 +30,15 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
     ModifiedPreview modifiedPreview;
 
     String desc = "desc....";
+    String azimuth = "Az=";
 
     void setContext(Context context){
         this.context = context;
     }
 
     void makeUserOfNewAzimuth(double azimuth, String desc){
-        this.desc = "Az="+(int)azimuth+ "  "+desc;
+        this.azimuth = "Az="+(int)azimuth;
+        this.desc = desc;
         modifiedPreview.postInvalidate();
     }
 
@@ -50,7 +52,12 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
         Paint paintTxt = new Paint(){{
             setStyle(Style.STROKE);
             setColor(Color.BLUE);
-            setTextSize(20);
+            setTextSize(25);
+        }};
+        Paint paintTxtAz = new Paint(){{
+            setStyle(Style.STROKE);
+            setColor(Color.BLUE);
+            setTextSize(50);
         }};
 
         public ModifiedPreview(Context context) {
@@ -65,8 +72,10 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
             canvas.drawCircle(20, 20, 20, paint);
-            canvas.drawLine(20, 0, canvas.getWidth(), canvas.getHeight(), paint);
-            canvas.drawText(desc, canvas.getWidth()/2, canvas.getHeight()/2, paintTxt);
+            canvas.drawLine(canvas.getWidth() / 2, canvas.getHeight() / 4, canvas.getWidth() / 2, canvas.getHeight(), paint);
+            canvas.drawLine(0, canvas.getHeight()/2, canvas.getWidth(), canvas.getHeight()/2, paint);
+            canvas.drawText(desc, canvas.getWidth()/4, canvas.getHeight()*2/3, paintTxt);
+            canvas.drawText(azimuth, canvas.getWidth()/4, canvas.getHeight()/3, paintTxtAz);
         }
 
     }
