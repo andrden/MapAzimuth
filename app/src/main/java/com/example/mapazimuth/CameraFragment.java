@@ -21,6 +21,7 @@ import java.util.List;
 
 public class CameraFragment extends Fragment implements Camera.PreviewCallback{
     Context context;
+    View.OnTouchListener onTouchListener;
 
     private Camera mCamera;
     Camera.Parameters cameraParms;
@@ -32,8 +33,9 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
     String desc = "desc....";
     String azimuth = "Az=";
 
-    void setContext(Context context){
+    void setContext(Context context, View.OnTouchListener onTouchListener){
         this.context = context;
+        this.onTouchListener = onTouchListener;
     }
 
     void makeUserOfNewAzimuth(double azimuth, String desc){
@@ -74,7 +76,7 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
             canvas.drawCircle(20, 20, 20, paint);
             canvas.drawLine(canvas.getWidth() / 2, canvas.getHeight() / 4, canvas.getWidth() / 2, canvas.getHeight(), paint);
             canvas.drawLine(0, canvas.getHeight()/2, canvas.getWidth(), canvas.getHeight()/2, paint);
-            canvas.drawText(desc, canvas.getWidth()/4, canvas.getHeight()*2/3, paintTxt);
+            canvas.drawText(desc, canvas.getWidth() / 4, canvas.getHeight() * 2 / 3, paintTxt);
             canvas.drawText(azimuth, canvas.getWidth()/4, canvas.getHeight()/3, paintTxtAz);
         }
 
@@ -93,6 +95,8 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
         FrameLayout preview = (FrameLayout) rootView.findViewById(R.id.camera_preview);
 
         modifiedPreview = new ModifiedPreview(context);
+        modifiedPreview.setOnTouchListener(onTouchListener);
+
         preview.addView(modifiedPreview);
         preview.addView(mPreview, 0);
 

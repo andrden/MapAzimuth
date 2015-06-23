@@ -8,6 +8,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
+import android.view.MotionEvent;
+import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,6 +24,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 public class TabsPagerAdapter extends FragmentPagerAdapter {
     Context context;
+    ViewPager viewPager;
 
     SupportMapFragment mapFragment;
     FirstPage firstPage = new FirstPage();
@@ -33,9 +37,10 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
     double azimuth;
 
 
-    public TabsPagerAdapter(FragmentManager fm, Context context) {
+    public TabsPagerAdapter(ViewPager viewPager, FragmentManager fm, Context context) {
         super(fm);
         this.context = context;
+        this.viewPager = viewPager;
     }
 
     void makeUseOfNewLocation(boolean gps, Location location){
@@ -65,7 +70,15 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
             case 1:
                 // Games fragment activity
                 cameraFragment = new CameraFragment();
-                cameraFragment.setContext(context);
+                cameraFragment.setContext(context, new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        if (event.getAction()==MotionEvent.ACTION_DOWN) {
+                            viewPager.setCurrentItem(2); // switch from camera to map
+                        }
+                        return true;
+                    }
+                });
                 return cameraFragment;
             case 2:
                 // Movies fragment activity
@@ -83,6 +96,9 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
     }
 
     void setupMap() {
+        if( azimuth<0 ){
+            return; // no valid bearing to show, don't change the map
+        }
         if( mapFragment!=null ) {
             GoogleMap map = mapFragment.getMap();
             if (map != null) {
@@ -109,7 +125,7 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
                     if( oldPolyline!=null ){
                         oldPolyline.remove();
                     }
-                    oldMarker = map.addMarker(new MarkerOptions().position(latLng).title("Me"));
+                    oldMarker = map.addMarker(new MarkerOptions().position(latLng).title("Me az="+Math.round(azimuth)));
                     oldPolyline = map.addPolyline(new PolylineOptions().color(Color.BLUE).add(latLng, latLngBearing));
 
                     try {

@@ -49,6 +49,8 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
             if( intRoll < -80 && Math.abs(intPitch) < 5 ) {
                desc += String.format(" gx=%.1f gy=%.1f gz=%.1f  a=%.1f",
                         geomagAvg[0].getAvg(), geomagAvg[1].getAvg(), geomagAvg[2].getAvg(), magAzimuth);
+            }else{
+                magAzimuth = -1; // probably invalid, don't even show
             }
             mAdapter.makeUserOfNewAzimuth(magAzimuth /*compassCalc.azimuth.getAvg()+90*/, desc);
         }
@@ -65,7 +67,7 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
 // Initilization
         viewPager = (ViewPager) findViewById(R.id.pager);
         actionBar = getActionBar();
-        mAdapter = new TabsPagerAdapter(getSupportFragmentManager(), this);
+        mAdapter = new TabsPagerAdapter(viewPager, getSupportFragmentManager(), this);
 
         viewPager.setAdapter(mAdapter);
         actionBar.setHomeButtonEnabled(false);
