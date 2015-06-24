@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import java.security.Policy;
 import java.util.List;
 
 public class CameraFragment extends Fragment implements Camera.PreviewCallback{
@@ -30,8 +31,10 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
     private CameraPreview mPreview;
     ModifiedPreview modifiedPreview;
 
+    float viewAngle;
     String desc = "desc....";
     String azimuth = "Az=";
+    double azimuthVal;
 
     void setContext(Context context, View.OnTouchListener onTouchListener){
         this.context = context;
@@ -41,6 +44,7 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
     void makeUserOfNewAzimuth(double azimuth, String desc){
         this.azimuth = "Az="+(int)azimuth;
         this.desc = desc;
+        this.azimuthVal = azimuth;
         modifiedPreview.postInvalidate();
     }
 
@@ -53,12 +57,12 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
         }};
         Paint paintTxt = new Paint(){{
             setStyle(Style.STROKE);
-            setColor(Color.BLUE);
+            setColor(Color.GREEN);
             setTextSize(25);
         }};
         Paint paintTxtAz = new Paint(){{
             setStyle(Style.STROKE);
-            setColor(Color.BLUE);
+            setColor(Color.GREEN);
             setTextSize(50);
         }};
 
@@ -78,6 +82,21 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
             canvas.drawLine(0, canvas.getHeight()/2, canvas.getWidth(), canvas.getHeight()/2, paint);
             canvas.drawText(desc, canvas.getWidth() / 4, canvas.getHeight() * 2 / 3, paintTxt);
             canvas.drawText(azimuth, canvas.getWidth()/4, canvas.getHeight()/3, paintTxtAz);
+
+            if( azimuthVal >= 0 ) {
+                //int previewW = canvas.getWidth(); // actually must be preview width
+                int previewW = CameraFragment.this.mPreview.getChildAt(0).getWidth();
+                float degreePixels = previewW / viewAngle;
+                int azCenter = (int)azimuthVal;
+                int halfViewAngle = Math.round(viewAngle / 2);
+                for( int i= - halfViewAngle; i<= + halfViewAngle; i++){
+                    float azX = canvas.getWidth()/2 - Math.round((azimuthVal - azCenter + i) * degreePixels);
+                    canvas.drawLine(azX, 5, azX, 15, paint);
+                    int az = azCenter + i;
+                    if( az>360 ) az -= 360;
+                    canvas.drawText(""+az, azX-3, 35, paintTxt);
+                }
+            }
         }
 
     }
@@ -132,18 +151,21 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
         // Smaller images are recommended because some computer vision operations are very expensive
         List<Camera.Size> sizes = cameraParms.getSupportedPreviewSizes();
         //Camera.Size s = sizes.get(closest(sizes,320,240));
-        Camera.Size s = sizes.get(closest(sizes,800,480));
+        Camera.Size s = sizes.get(closest(sizes, 800, 480));
         cameraParms.setPreviewSize(s.width, s.height);
 
-        cameraParms.setZoom(cameraParms.getMaxZoom());
+        int zoom = cameraParms.getMaxZoom();
+        cameraParms.setZoom(zoom);
+        viewAngle = cameraParms.getVerticalViewAngle()/*we are in portait*/ * 100 / cameraParms.getZoomRatios().get(zoom);
+        cameraParms.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY);
 
-        // Sony:
-        // cameraParms.get("iso-values") auto,off,ISO_HJR,ISO100,ISO200,ISO400,ISO800,ISO1600
-        //cameraParms.set("iso", "ISO1600");
-        // param "sony-iso"="auto"
+                // Sony:
+                // cameraParms.get("iso-values") auto,off,ISO_HJR,ISO100,ISO200,ISO400,ISO800,ISO1600
+                //cameraParms.set("iso", "ISO1600");
+                // param "sony-iso"="auto"
 
-        // "vertical-view-angle"=42.5
-        // "horizontal-view-angle"=54.8
+                // "vertical-view-angle"=42.5
+                // "horizontal-view-angle"=54.8
 
         mCamera.setParameters(cameraParms);
 
@@ -235,6 +257,6 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-
+       // "".length();
     }
 }
