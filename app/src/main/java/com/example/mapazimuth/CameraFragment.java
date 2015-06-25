@@ -90,10 +90,11 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
                 int azCenter = (int)azimuthVal;
                 int halfViewAngle = Math.round(viewAngle / 2);
                 for( int i= - halfViewAngle; i<= + halfViewAngle; i++){
-                    float azX = canvas.getWidth()/2 - Math.round((azimuthVal - azCenter + i) * degreePixels);
+                    float azX = canvas.getWidth()/2 - Math.round((azimuthVal - azCenter - i) * degreePixels);
                     canvas.drawLine(azX, 5, azX, 15, paint);
                     int az = azCenter + i;
                     if( az>360 ) az -= 360;
+                    if( az<0 ) az += 360;
                     canvas.drawText(""+az, azX-3, 35, paintTxt);
                 }
             }
@@ -156,7 +157,9 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
 
         int zoom = cameraParms.getMaxZoom();
         cameraParms.setZoom(zoom);
-        viewAngle = cameraParms.getVerticalViewAngle()/*we are in portait*/ * 100 / cameraParms.getZoomRatios().get(zoom);
+        if( cameraParms.getZoomRatios()!=null ) {
+            viewAngle = cameraParms.getVerticalViewAngle()/*we are in portait*/ * 100 / cameraParms.getZoomRatios().get(zoom);
+        }
         cameraParms.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY);
 
                 // Sony:
@@ -167,6 +170,7 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
                 // "vertical-view-angle"=42.5
                 // "horizontal-view-angle"=54.8
 
+        mCamera.cancelAutoFocus();
         mCamera.setParameters(cameraParms);
 
         Log.w("VideoActivity", "chosen preview size " + s.width + " x " + s.height);

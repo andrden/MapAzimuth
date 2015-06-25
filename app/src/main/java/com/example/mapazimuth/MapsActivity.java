@@ -28,7 +28,7 @@ public class MapsActivity extends FragmentActivity implements ActionBar.TabListe
     private TabsPagerAdapter mAdapter;
     private ActionBar actionBar;
     // Tab titles
-    private String[] tabs = { "Tab1", "Tab2", "Map" };
+    private String[] tabs = { "Tab1", "Camera", "Map"};
 
     LocationManager locationManager;
     LocationListener locationListenerGps = new MyLocationListener(true);

@@ -26,7 +26,8 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
     Context context;
     ViewPager viewPager;
 
-    SupportMapFragment mapFragment;
+    SupportMapFragment mapFragment = new SupportMapFragment();
+
     FirstPage firstPage = new FirstPage();
     CameraFragment cameraFragment;
 
@@ -73,7 +74,7 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
                 cameraFragment.setContext(context, new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
-                        if (event.getAction()==MotionEvent.ACTION_DOWN) {
+                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
                             viewPager.setCurrentItem(2); // switch from camera to map
                         }
                         return true;
@@ -81,13 +82,6 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
                 });
                 return cameraFragment;
             case 2:
-                // Movies fragment activity
-                //return new MoviesFragment();
-                //return new CameraFragment();
-                if( mapFragment==null ){
-                    //mapFragment= new MapFragment();
-                    mapFragment = new SupportMapFragment();
-                }
                 setupMap();
                 return mapFragment;
         }
@@ -95,48 +89,50 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
         return null;
     }
 
-    void setupMap() {
-        if( azimuth<0 ){
-            return; // no valid bearing to show, don't change the map
-        }
-        if( mapFragment!=null ) {
-            GoogleMap map = mapFragment.getMap();
-            if (map != null) {
-                //map.getCameraPosition() -- ??
-                if( location!=null ) {
-                    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    double screenPerpAzimuth = azimuth; // degrees
-                    final double KM = 30;
-                    double kmX = KM * Math.sin(Math.toRadians(screenPerpAzimuth)); // delta longitudinal
-                    double kmY = KM * Math.cos(Math.toRadians(screenPerpAzimuth)); // delta latitude
-                    double degreeLatitude = 111; // acually 110.5 .. 111.5 because earth is ellipsoid
-                    double degreeLongitude = degreeLatitude * Math.cos(Math.toRadians(location.getLatitude()));
-                    //LatLng latLngBearing = new LatLng(location.getLatitude(), location.getLongitude()-0.3);
-                    LatLng latLngBearing = new LatLng(
-                            location.getLatitude() + kmY / degreeLatitude,
-                            location.getLongitude() + kmX / degreeLongitude);
-                    LatLng latLngBearingShort = new LatLng(
-                            location.getLatitude() + kmY / degreeLatitude / 10,
-                            location.getLongitude() + kmX / degreeLongitude / 10);
+    void setupMap(){
+            if( mapFragment!=null ) {
+                final GoogleMap map = mapFragment.getMap();
+                //mapFragment.setHasOptionsMenu(true);
+                //mapFragment.setMenuVisibility(true);
+                if (map != null) {
+                    map.setMapType(firstPage.getMapType());
+                    //map.getUiSettings().setMapToolbarEnabled(true);
+                    //map.getCameraPosition() -- ??
+                    if( location!=null && azimuth>=0 ) {
+                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        double screenPerpAzimuth = azimuth; // degrees
+                        final double KM = 30;
+                        double kmX = KM * Math.sin(Math.toRadians(screenPerpAzimuth)); // delta longitudinal
+                        double kmY = KM * Math.cos(Math.toRadians(screenPerpAzimuth)); // delta latitude
+                        double degreeLatitude = 111; // acually 110.5 .. 111.5 because earth is ellipsoid
+                        double degreeLongitude = degreeLatitude * Math.cos(Math.toRadians(location.getLatitude()));
+                        //LatLng latLngBearing = new LatLng(location.getLatitude(), location.getLongitude()-0.3);
+                        LatLng latLngBearing = new LatLng(
+                                location.getLatitude() + kmY / degreeLatitude,
+                                location.getLongitude() + kmX / degreeLongitude);
+                        LatLng latLngBearingShort = new LatLng(
+                                location.getLatitude() + kmY / degreeLatitude / 10,
+                                location.getLongitude() + kmX / degreeLongitude / 10);
 
-                    if( oldMarker!=null ){
-                        oldMarker.remove();
-                    }
-                    if( oldPolyline!=null ){
-                        oldPolyline.remove();
-                    }
-                    oldMarker = map.addMarker(new MarkerOptions().position(latLng).title("Me az="+Math.round(azimuth)));
-                    oldPolyline = map.addPolyline(new PolylineOptions().color(Color.BLUE).add(latLng, latLngBearing));
+                        if( oldMarker!=null ){
+                            oldMarker.remove();
+                        }
+                        if( oldPolyline!=null ){
+                            oldPolyline.remove();
+                        }
+                        oldMarker = map.addMarker(new MarkerOptions().position(latLng).title("Me az="+Math.round(azimuth)));
+                        oldPolyline = map.addPolyline(new PolylineOptions().color(Color.BLUE).add(latLng, latLngBearing));
 
-                    try {
-                        map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds(latLng, latLngBearingShort), 20));
-                    }catch (IllegalStateException e){
-                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, map.getMaxZoomLevel()-4));
+                        try {
+                            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds(latLng, latLngBearingShort), 20));
+                        }catch (IllegalStateException e){
+                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, map.getMaxZoomLevel()-4));
+                        }
                     }
                 }
             }
-        }
     }
+
 
     LatLngBounds bounds(LatLng p1, LatLng p2){
         LatLng southWest = new LatLng(Math.min(p1.latitude, p2.latitude), Math.min(p1.longitude, p2.longitude));
