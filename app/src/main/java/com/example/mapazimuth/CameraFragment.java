@@ -20,6 +20,12 @@ import android.widget.TextView;
 import java.security.Policy;
 import java.util.List;
 
+import boofcv.abst.feature.detect.interest.ConfigGeneralDetector;
+import boofcv.abst.feature.tracker.PointTracker;
+import boofcv.factory.feature.tracker.FactoryPointTracker;
+import boofcv.struct.image.ImageSInt16;
+import boofcv.struct.image.ImageUInt8;
+
 public class CameraFragment extends Fragment implements Camera.PreviewCallback{
     Context context;
     View.OnTouchListener onTouchListener;
@@ -121,6 +127,16 @@ public class CameraFragment extends Fragment implements Camera.PreviewCallback{
         preview.addView(mPreview, 0);
 
         setUpAndConfigureCamera();
+
+//        ConfigGeneralDetector config = new ConfigGeneralDetector();
+//        config.maxFeatures = 150;
+//        config.threshold = 40;
+//        config.radius = 3;
+//
+//        PointTracker<ImageUInt8> tracker =
+//                FactoryPointTracker.klt(new int[]{1, 2, 4}, config, 3, ImageUInt8.class, ImageSInt16.class);
+//        PointProcessing pointProcessing = new PointProcessing(tracker);
+//        pointProcessing.process();
 
         return rootView;
     }
